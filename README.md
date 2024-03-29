@@ -48,7 +48,8 @@ collect  →  clean  →  merge  →  features  →  write
 ```
 
 `analyze.py` reads the processed data, computes the correlations, and writes the
-three figures above.
+three figures above. For a narrated, cell-by-cell version of the same analysis,
+see **[`analysis.ipynb`](analysis.ipynb)**.
 
 ## Stack
 
