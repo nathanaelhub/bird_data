@@ -113,6 +113,55 @@ def fig_species(coll):
     plt.close(fig)
 
 
+def _mp_nights(coll):
+    """McCormick Place collision counts per night, deadliest first."""
+    return (coll[coll["locality"] == "McCormick Place"]
+            .groupby("date").size().sort_values(ascending=False).values)
+
+
+def fig_concentration(coll):
+    nights = _mp_nights(coll)
+    total = nights.sum()
+    cum = [0.0]
+    for v in nights:
+        cum.append(cum[-1] + v / total)
+    x = [i / len(nights) for i in range(len(nights) + 1)]
+    i10 = max(1, int(len(nights) * 0.10))
+    y10 = cum[i10]
+
+    fig, ax = plt.subplots(figsize=(7.2, 4.6), dpi=150)
+    # reference line: what the curve would look like if deaths were spread evenly
+    ax.plot([0, 1], [0, 1], color=MUTED, linestyle="--", linewidth=1, zorder=2)
+    ax.fill_between(x, cum, color=ACCENT, alpha=0.08, zorder=1)
+    ax.plot(x, cum, color=ACCENT, linewidth=2.2, zorder=4)
+    ax.plot([0.10, 0.10], [0, y10], color=INK, linestyle=":", linewidth=1, zorder=3)
+    ax.scatter([0.10], [y10], s=44, color=ACCENT, zorder=5,
+               edgecolor="white", linewidth=1.5)
+    ax.annotate(f"worst 10% of nights\ncause {y10:.0%} of deaths",
+                xy=(0.10, y10), xytext=(0.24, y10 - 0.15), fontsize=10.5,
+                color=INK, fontweight="bold",
+                arrowprops=dict(arrowstyle="-", color=MUTED, lw=1))
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ticks = [0, 0.25, 0.5, 0.75, 1.0]
+    ax.set_xticks(ticks)
+    ax.set_yticks(ticks)
+    ax.set_xticklabels([f"{int(t * 100)}%" for t in ticks])
+    ax.set_yticklabels([f"{int(t * 100)}%" for t in ticks])
+    ax.grid(True, color=GRID, linewidth=1, zorder=0)
+    ax.set_xlabel("share of monitored nights (deadliest first)",
+                  fontsize=10, color=MUTED, labelpad=8)
+    ax.set_ylabel("cumulative share of deaths", fontsize=10, color=MUTED, labelpad=8)
+    _style(ax, "The toll is concentrated on a few catastrophic nights",
+           "Cumulative deaths vs. nights at McCormick Place (dashed = deaths spread evenly)")
+    fig.text(0.5, 0.02, "Half the birds die on a tenth of the nights — so targeting the "
+             "highest-risk nights captures most of the benefit.", ha="center",
+             fontsize=9.5, color=MUTED)
+    fig.tight_layout(rect=[0, 0.06, 1, 0.84])
+    fig.savefig(FIG / "concentration.png", bbox_inches="tight", facecolor="white")
+    plt.close(fig)
+
+
 def main():
     if not (PROC / "collisions_clean.csv").exists():
         sys.exit("processed data missing — run `python etl.py` first.")
@@ -123,17 +172,21 @@ def main():
     fig_seasonal(coll)
     fig_light(daily)
     fig_species(coll)
+    fig_concentration(coll)
 
     # headline findings, printed for the record
     r = daily["light_score"].corr(daily["collisions"])
     # Spearman as a rank-Pearson, so we don't pull in scipy for one number
     rs = daily["light_score"].rank().corr(daily["collisions"].rank())
     share = (coll["flight_call"] == "Yes").mean()
+    nights = _mp_nights(coll)
+    worst10 = nights[:max(1, int(len(nights) * 0.10))].sum() / nights.sum()
     print(f"records analysed : {len(coll):,} collisions, {len(daily):,} MP nights")
     print(f"light vs deaths  : Pearson r={r:.3f}, Spearman={rs:.3f}")
     print(f"flight-callers   : {share:.1%} of all collisions")
     print(f"peak month       : {coll['month'].value_counts().idxmax()} "
           f"({MONTHS[coll['month'].value_counts().idxmax()]})")
+    print(f"concentration    : worst 10% of nights = {worst10:.0%} of all deaths")
     print(f"figures written  : {', '.join(p.name for p in sorted(FIG.glob('*.png')))}")
 
 
