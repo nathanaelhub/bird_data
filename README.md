@@ -30,10 +30,20 @@ families (sparrows, warblers, thrushes) take most of the toll.
 
 ![Collisions by family](figures/species.png)
 
+**4. And it lands on a handful of nights.** Collisions are extraordinarily
+uneven: the **worst 10% of nights account for ~48% of all deaths** (the worst 1%
+alone, ~14%). A typical night at McCormick Place kills 4 birds; the worst on
+record killed 269. Those catastrophic nights are also the brightest (mean light
+14.0 vs 11.5 on the rest) — heavy migration meeting lit glass.
+
+![Concentration of deaths across nights](figures/concentration.png)
+
 **Takeaway for conservation:** mortality is concentrated in known migration
-windows and rises with building light, so targeted **lights-out nights during
-peak passage** are a high-leverage, low-cost intervention — which is exactly the
-policy this kind of evidence has supported in Chicago, New York, and Toronto.
+windows, rises with building light, and lands overwhelmingly on a few high-risk
+nights — so a city doesn't need blanket lights-out. Targeting the **~10% of
+nights with heavy passage and high light** would prevent close to half the
+deaths at a fraction of the cost, which is exactly the kind of evidence behind
+the lights-out programs in Chicago, New York, and Toronto.
 
 ## Pipeline
 
