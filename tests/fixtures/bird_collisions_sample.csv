@@ -1,0 +1,10 @@
+genus,species,date,locality,family,flight_call,habitat,stratum
+Passerculus,sandwichensis,1978-10-27,MP,Passerellidae,Yes,Open,Lower
+Passerculus,sandwichensis,1979-10-23,MP, Passerellidae ,yes,Open,Lower
+Seiurus,aurocapilla,2005-05-10,MP,Parulidae,Yes,Forest,Lower
+Seiurus,aurocapilla,2005-05-10,MP,Parulidae,Yes,Forest,Lower
+Catharus,ustulatus,2010-09-15,CHI,Turdidae,Yes,Forest,Upper
+Melospiza,melodia,2012-04-02,MP,Passerellidae,No,Edge,Lower
+Zenaida,macroura,2011-07-04,MP,Columbidae,No,Open,Lower
+Turdus,migratorius,,MP,Turdidae,Yes,Edge,Lower
+Cardinalis,,2013-10-01,MP,Cardinalidae,No,Edge,Lower

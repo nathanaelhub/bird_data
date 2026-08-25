@@ -54,9 +54,12 @@ def collect() -> None:
         urllib.request.urlretrieve(url, dest)
 
 
-def clean_collisions() -> pd.DataFrame:
-    """Type, filter, and normalise the record-level collision data."""
-    df = pd.read_csv(RAW / "bird_collisions.csv")
+def clean_collisions(src: Path | None = None) -> pd.DataFrame:
+    """Type, filter, and normalise the record-level collision data.
+
+    ``src`` defaults to the cached raw file; tests pass a fixture path.
+    """
+    df = pd.read_csv(src if src is not None else RAW / "bird_collisions.csv")
     n0 = len(df)
 
     df["date"] = pd.to_datetime(df["date"], errors="coerce")
@@ -79,9 +82,12 @@ def clean_collisions() -> pd.DataFrame:
     return df
 
 
-def build_mp_daily(coll: pd.DataFrame) -> pd.DataFrame:
-    """McCormick Place daily collision counts joined to that day's light score."""
-    light = pd.read_csv(RAW / "mp_light.csv")
+def build_mp_daily(coll: pd.DataFrame, light_src: Path | None = None) -> pd.DataFrame:
+    """McCormick Place daily collision counts joined to that day's light score.
+
+    ``light_src`` defaults to the cached raw file; tests pass a fixture path.
+    """
+    light = pd.read_csv(light_src if light_src is not None else RAW / "mp_light.csv")
     light["date"] = pd.to_datetime(light["date"], errors="coerce")
     light = light.dropna(subset=["date", "light_score"])
 
