@@ -11,7 +11,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
-import etl
+from birddata import etl
 
 FIXTURES = Path(__file__).parent / "fixtures"
 COLLISIONS = FIXTURES / "bird_collisions_sample.csv"

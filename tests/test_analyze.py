@@ -7,7 +7,7 @@ independently of the (network-fetched) real dataset.
 import numpy as np
 import pytest
 
-import analyze
+from birddata import analyze
 
 
 def test_perfectly_even_distribution():

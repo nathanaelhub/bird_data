@@ -3,7 +3,7 @@ ETL for the Chicago bird-window-collision study.
 
 One command replaces the manual workflow this analysis used to be — download two
 files by hand, retype columns, delete bad rows, VLOOKUP the light scores onto the
-collision dates, then add season columns. `python etl.py` does all of it and is
+collision dates, then add season columns. `bird-etl` does all of it and is
 reproducible end to end:
 
     1. collect   fetch both source files (cached under data/raw/)
@@ -24,7 +24,7 @@ from pathlib import Path
 
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent  # repo root (package lives in birddata/)
 RAW = ROOT / "data" / "raw"
 PROC = ROOT / "data" / "processed"
 

@@ -8,7 +8,7 @@ turns on, writing one figure each to figures/:
     light_mortality.png  do brighter nights kill more?      (the conservation lever)
     species.png          which birds die?                   (who is vulnerable)
 
-Run `python etl.py` first.
+Run `bird-etl` first.
 """
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent  # repo root (package lives in birddata/)
 PROC = ROOT / "data" / "processed"
 FIG = ROOT / "figures"
 
@@ -179,7 +179,7 @@ def fig_concentration(coll):
 
 def main():
     if not (PROC / "collisions_clean.csv").exists():
-        sys.exit("processed data missing — run `python etl.py` first.")
+        sys.exit("processed data missing — run `bird-etl` first.")
     coll = pd.read_csv(PROC / "collisions_clean.csv", parse_dates=["date"])
     daily = pd.read_csv(PROC / "mp_daily.csv", parse_dates=["date"])
     FIG.mkdir(exist_ok=True)

@@ -20,8 +20,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install dependencies
-        run: pip install -r requirements-dev.txt
+      - name: Install package + dev dependencies
+        run: pip install -e ".[dev]"
 
       - name: Run tests
         # tests use committed fixtures only — no network fetch of the source data
