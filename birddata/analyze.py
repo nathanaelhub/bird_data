@@ -8,7 +8,7 @@ turns on, writing one figure each to figures/:
     light_mortality.png  do brighter nights kill more?      (the conservation lever)
     species.png          which birds die?                   (who is vulnerable)
 
-Run `python etl.py` first.
+Run `bird-etl` first.
 """
 from __future__ import annotations
 
@@ -16,9 +16,10 @@ import sys
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parent.parent  # repo root (package lives in birddata/)
 PROC = ROOT / "data" / "processed"
 FIG = ROOT / "figures"
 
@@ -119,15 +120,29 @@ def _mp_nights(coll):
             .groupby("date").size().sort_values(ascending=False).values)
 
 
-def fig_concentration(coll):
-    nights = _mp_nights(coll)
+def concentration_share(nights, frac):
+    """Share of all deaths falling on the deadliest ``frac`` of nights.
+
+    ``nights`` is a sequence of per-night counts (any order); ``frac`` is in
+    (0, 1]. Returns the cumulative fraction of deaths on the worst
+    ``max(1, floor(frac * n))`` nights — e.g. ``frac=0.10`` answers "what share
+    of deaths happen on the worst 10% of nights?". Underpins the concentration
+    figure and the printed headline so both report the same number.
+    """
+    nights = np.sort(np.asarray(nights, dtype=float))[::-1]
     total = nights.sum()
-    cum = [0.0]
-    for v in nights:
-        cum.append(cum[-1] + v / total)
-    x = [i / len(nights) for i in range(len(nights) + 1)]
-    i10 = max(1, int(len(nights) * 0.10))
-    y10 = cum[i10]
+    if len(nights) == 0 or total == 0:
+        return 0.0
+    k = max(1, int(len(nights) * frac))
+    return float(nights[:k].sum() / total)
+
+
+def fig_concentration(coll):
+    nights = np.sort(_mp_nights(coll))[::-1]
+    total = nights.sum()
+    cum = np.concatenate([[0.0], np.cumsum(nights) / total])
+    x = np.arange(len(nights) + 1) / len(nights)
+    y10 = concentration_share(nights, 0.10)
 
     fig, ax = plt.subplots(figsize=(7.2, 4.6), dpi=150)
     # reference line: what the curve would look like if deaths were spread evenly
@@ -164,7 +179,7 @@ def fig_concentration(coll):
 
 def main():
     if not (PROC / "collisions_clean.csv").exists():
-        sys.exit("processed data missing — run `python etl.py` first.")
+        sys.exit("processed data missing — run `bird-etl` first.")
     coll = pd.read_csv(PROC / "collisions_clean.csv", parse_dates=["date"])
     daily = pd.read_csv(PROC / "mp_daily.csv", parse_dates=["date"])
     FIG.mkdir(exist_ok=True)
@@ -179,8 +194,7 @@ def main():
     # Spearman as a rank-Pearson, so we don't pull in scipy for one number
     rs = daily["light_score"].rank().corr(daily["collisions"].rank())
     share = (coll["flight_call"] == "Yes").mean()
-    nights = _mp_nights(coll)
-    worst10 = nights[:max(1, int(len(nights) * 0.10))].sum() / nights.sum()
+    worst10 = concentration_share(_mp_nights(coll), 0.10)
     print(f"records analysed : {len(coll):,} collisions, {len(daily):,} MP nights")
     print(f"light vs deaths  : Pearson r={r:.3f}, Spearman={rs:.3f}")
     print(f"flight-callers   : {share:.1%} of all collisions")

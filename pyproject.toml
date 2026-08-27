@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bird_data"
+version = "0.1.0"
+description = "ETL and analysis of 40 years of Chicago bird-window-collision data"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+dependencies = [
+    "pandas>=2.0",
+    "matplotlib>=3.7",
+    "numpy>=1.24",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+notebook = ["jupyter>=1.0"]
+
+[project.scripts]
+bird-etl = "birddata.etl:main"
+bird-analyze = "birddata.analyze:main"
+
+[tool.setuptools]
+packages = ["birddata"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# keep the repo root importable so `from birddata import ...` works even without
+# an editable install
+pythonpath = ["."]
