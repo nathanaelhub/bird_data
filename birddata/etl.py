@@ -16,6 +16,7 @@ Source: Winger, Weeks, Farnsworth, Jones, Hennen & Willard (2019),
 "Nocturnal flight-calling behaviour predicts vulnerability to artificial light
 in migratory birds", Proc. R. Soc. B — distributed via the TidyTuesday mirror.
 """
+
 from __future__ import annotations
 
 import sys
@@ -36,8 +37,7 @@ SOURCES = {
 }
 
 # The dataset only spans migration months; label them by season.
-SEASON = {3: "Spring", 4: "Spring", 5: "Spring",
-          8: "Fall", 9: "Fall", 10: "Fall", 11: "Fall"}
+SEASON = {3: "Spring", 4: "Spring", 5: "Spring", 8: "Fall", 9: "Fall", 10: "Fall", 11: "Fall"}
 
 LOCALITY = {"MP": "McCormick Place", "CHI": "Greater Chicago"}
 
@@ -77,8 +77,7 @@ def clean_collisions(src: Path | None = None) -> pd.DataFrame:
     df["season"] = df["month"].map(SEASON)
     df["decade"] = (df["year"] // 10 * 10).astype("Int64")
 
-    print(f"  cleaned  {n0:,} -> {len(df):,} collision records "
-          f"({n0 - len(df):,} dropped)")
+    print(f"  cleaned  {n0:,} -> {len(df):,} collision records ({n0 - len(df):,} dropped)")
     return df
 
 
@@ -91,8 +90,13 @@ def build_mp_daily(coll: pd.DataFrame, light_src: Path | None = None) -> pd.Data
     light["date"] = pd.to_datetime(light["date"], errors="coerce")
     light = light.dropna(subset=["date", "light_score"])
 
-    mp = (coll[coll["locality"] == "McCormick Place"]
-          .groupby("date").size().rename("collisions").reset_index())
+    mp = (
+        coll[coll["locality"] == "McCormick Place"]
+        .groupby("date")
+        .size()
+        .rename("collisions")
+        .reset_index()
+    )
     daily = mp.merge(light, on="date", how="inner")
     daily["month"] = daily["date"].dt.month
     daily["season"] = daily["month"].map(SEASON)
@@ -110,8 +114,7 @@ def main() -> None:
     PROC.mkdir(parents=True, exist_ok=True)
     coll.to_csv(PROC / "collisions_clean.csv", index=False)
     daily.to_csv(PROC / "mp_daily.csv", index=False)
-    print(f"\nwrote {PROC.relative_to(ROOT)}/collisions_clean.csv "
-          f"and mp_daily.csv")
+    print(f"\nwrote {PROC.relative_to(ROOT)}/collisions_clean.csv and mp_daily.csv")
 
 
 if __name__ == "__main__":

@@ -16,7 +16,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=7.0"]
+dev = ["pytest>=7.0", "ruff>=0.6"]
 notebook = ["jupyter>=1.0"]
 
 [project.scripts]
@@ -31,3 +31,13 @@ testpaths = ["tests"]
 # keep the repo root importable so `from birddata import ...` works even without
 # an editable install
 pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+# the notebook is an exploratory narrative, not library code — don't lint it
+extend-exclude = ["*.ipynb"]
+
+[tool.ruff.lint]
+# pyflakes (F), pycodestyle (E/W), isort (I), pyupgrade (UP), bugbear (B)
+select = ["E", "F", "W", "I", "UP", "B"]

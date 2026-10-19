@@ -4,6 +4,7 @@
 "worst 10% of nights = X% of deaths" headline, so it is worth pinning
 independently of the (network-fetched) real dataset.
 """
+
 import numpy as np
 import pytest
 
@@ -52,3 +53,60 @@ def test_matches_naive_computation():
     k = max(1, int(len(ordered) * frac))
     expected = ordered[:k].sum() / ordered.sum()
     assert analyze.concentration_share(nights, frac) == pytest.approx(expected)
+
+
+# --- correlation_stats -------------------------------------------------------
+
+
+def test_correlation_r_matches_numpy():
+    rng = np.random.default_rng(1)
+    x = rng.normal(size=500)
+    y = 0.5 * x + rng.normal(size=500)
+    st = analyze.correlation_stats(x, y)
+    assert st["r"] == pytest.approx(np.corrcoef(x, y)[0, 1])
+    assert st["n"] == 500
+
+
+def test_correlation_ci_brackets_r_and_is_ordered():
+    rng = np.random.default_rng(2)
+    x = rng.normal(size=400)
+    y = 0.4 * x + rng.normal(size=400)
+    st = analyze.correlation_stats(x, y)
+    assert st["ci_low"] < st["r"] < st["ci_high"]
+
+
+def test_correlation_strong_is_significant():
+    rng = np.random.default_rng(3)
+    x = rng.normal(size=300)
+    y = 2 * x + rng.normal(scale=0.1, size=300)  # near-perfect
+    st = analyze.correlation_stats(x, y)
+    assert st["r"] > 0.9
+    assert st["p"] < 1e-6
+
+
+def test_correlation_none_is_not_significant():
+    rng = np.random.default_rng(4)
+    x = rng.normal(size=1000)
+    y = rng.normal(size=1000)  # independent
+    st = analyze.correlation_stats(x, y)
+    assert st["p"] > 0.05
+
+
+def test_correlation_drops_nan_pairs():
+    x = np.array([1.0, 2.0, 3.0, 4.0, np.nan])
+    y = np.array([2.0, 4.0, 6.0, 8.0, 100.0])
+    st = analyze.correlation_stats(x, y)
+    assert st["n"] == 4
+    assert st["r"] == pytest.approx(1.0)
+
+
+def test_correlation_degenerate_inputs_are_nan():
+    # too few points, and a constant series: both yield NaN, no crash
+    assert np.isnan(analyze.correlation_stats([1, 2], [3, 4])["r"])
+    assert np.isnan(analyze.correlation_stats([5, 5, 5, 5], [1, 2, 3, 4])["p"])
+
+
+def test_fmt_p():
+    assert analyze._fmt_p(0.0001) == "p < 0.001"
+    assert analyze._fmt_p(0.042) == "p = 0.042"
+    assert analyze._fmt_p(float("nan")) == "p = n/a"
