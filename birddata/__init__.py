@@ -9,6 +9,7 @@ or import the transformations directly:
 
     from birddata import etl, analyze
 """
+
 __version__ = "0.1.0"
 
 __all__ = ["etl", "analyze", "__version__"]

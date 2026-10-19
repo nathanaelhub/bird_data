@@ -18,7 +18,8 @@ spring- and fall-passage phenomenon, peaking in October.
 
 **2. Brighter nights kill more birds.** Joining each McCormick Place night to its
 building-light score, nights in the brightest third average roughly **twice** the
-collisions of the darkest third (Pearson r ≈ 0.17 across 1,641 nights). Light is
+collisions of the darkest third (Pearson r ≈ 0.17, 95% CI 0.12–0.22, p < 0.001
+across 1,641 nights). The correlation is modest but highly significant: light is
 the environmental lever — and the one behind Chicago's "Lights Out" program.
 
 ![Light level vs mortality](figures/light_mortality.png)
@@ -37,6 +38,14 @@ record killed 269. Those catastrophic nights are also the brightest (mean light
 14.0 vs 11.5 on the rest) — heavy migration meeting lit glass.
 
 ![Concentration of deaths across nights](figures/concentration.png)
+
+**5. Per-night mortality has edged down over the record.** Controlling for
+monitoring effort (deaths *per monitored night*, 2000–2016), the rate drifts
+slightly downward — a small but statistically real decline (p ≈ 0.001). The
+effect is tiny next to the night-to-night swings, so it's a gentle trend, not a
+solved problem.
+
+![Per-night mortality trend](figures/trend.png)
 
 **Takeaway for conservation:** mortality is concentrated in known migration
 windows, rises with building light, and lands overwhelmingly on a few high-risk
@@ -57,9 +66,10 @@ collect  →  clean  →  merge  →  features  →  write
  sources    filter     on date    period      CSVs
 ```
 
-`birddata/analyze.py` reads the processed data, computes the correlations, and writes the
-three figures above. For a narrated, cell-by-cell version of the same analysis,
-see **[`analysis.ipynb`](analysis.ipynb)**.
+`birddata/analyze.py` reads the processed data, computes the correlations (with
+confidence intervals and significance), and writes the five figures above. For a
+narrated, cell-by-cell version of the same analysis, see
+**[`analysis.ipynb`](analysis.ipynb)**.
 
 ## Stack
 
@@ -92,18 +102,24 @@ suite that runs against tiny committed fixtures (`tests/fixtures/`) — no netwo
 and no downloaded source data required. It pins the behaviours the old manual
 spreadsheet routine kept getting wrong: date typing, dropping incomplete rows,
 filtering to migration months, label normalisation, the date-based light-score
-join, and "worst 10% of nights = X% of deaths".
+join, "worst 10% of nights = X% of deaths", and the correlation statistics
+(r, confidence interval, and p-value) behind the light-vs-mortality finding.
 
 ```bash
 pip install -e ".[dev]"
 pytest
+ruff check .          # lint
+ruff format --check .  # formatting
 ```
 
-The same suite runs on every push and pull request via GitHub Actions
-([`.github/workflows/ci.yml`](.github/workflows/ci.yml)).
+The suite, the lint check, and the format check all run on every push and pull
+request via GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)),
+on Python 3.11 and 3.12.
 
 ## Credit
 
 Collision and light data © the study authors (Winger, Weeks, Farnsworth, Jones,
 Hennen & Willard, 2019), used here for a non-commercial analysis. This repository
 is my ETL, analysis, and write-up of their public dataset.
+
+The code in this repository is released under the [MIT License](LICENSE).
